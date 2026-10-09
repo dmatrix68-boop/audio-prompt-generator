@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Referenz → Prompt</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+:root{
+  --bg:#1d1b19;
+  --panel:#262220;
+  --panel-2:#2e2926;
+  --line:#413a34;
+  --line-soft:#332e2a;
+  --paper:#ece6da;
+  --paper-dim:#a89f92;
+  --paper-faint:#7a7268;
+  --vu:#e8a33d;
+  --vu-hot:#f2bb63;
+  --signal:#69aca3;
+  --signal-dim:#3f6d68;
+  --alert:#c2553f;
+  --ui:'Barlow Semi Condensed','Segoe UI',sans-serif;
+  --mono:'IBM Plex Mono','Consolas',monospace;
+}
+
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--bg);
+  color:var(--paper);
+  font-family:var(--ui);
+  font-size:17px;
+  line-height:1.5;
+  padding:28px 16px 90px;
+}
+.wrap{max-width:860px;margin:0 auto;}
+
+h1{
+  font-size:38px;
+  font-weight:600;
+  letter-spacing:-.01em;
+  margin:0 0 6px;
+  line-height:1.05;
+}
+h1 .arrow{color:var(--vu);font-family:var(--mono);font-weight:400;}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;}
+.lang{display:flex;flex:none;}
+.lang button{font-family:var(--mono);font-size:13px;padding:5px 10px;}
+.lang button + button{margin-left:-1px;}
+.lang button[aria-pressed="true"]{position:relative;z-index:1;background:var(--panel-2);color:var(--vu);border-color:var(--vu);}
+.lede{color:var(--paper-dim);margin:0 0 26px;max-width:56ch;}
+
+section{
+  border:1px solid var(--line);
+  background:var(--panel);
+  padding:18px 18px 20px;
+  margin-bottom:18px;
+}
+h2{
+  font-size:15px;
+  font-weight:600;
+  letter-spacing:.04em;
+  margin:0 0 14px;
+  color:var(--paper-dim);
+  display:flex;
+  align-items:baseline;
+  gap:10px;
+}
+h2::after{
+  content:"";
+  flex:1;
+  height:1px;
+  background:var(--line-soft);
+}
+
+label{display:block;font-size:14px;color:var(--paper-dim);margin-bottom:5px;}
+input[type=text],input[type=password],select,textarea{
+  width:100%;
+  background:var(--bg);
+  border:1px solid var(--line);
+  color:var(--paper);
+  font-family:var(--mono);
+  font-size:14px;
+  padding:9px 11px;
+  border-radius:2px;
+}
+input:focus,select:focus,textarea:focus,button:focus-visible,.drop:focus-visible{
+  outline:2px solid var(--signal);
+  outline-offset:2px;
+}
+.row{display:flex;gap:12px;flex-wrap:wrap;}
+.row > *{flex:1 1 200px;min-width:0;}
+.field{margin-bottom:14px;}
+.hint{font-size:13px;color:var(--paper-faint);margin-top:6px;}
+.hint a{color:var(--signal);}
+
+button{
+  font-family:var(--ui);
+  font-size:16px;
+  font-weight:500;
+  background:var(--vu);
+  color:#221c14;
+  border:none;
+  padding:11px 22px;
+  border-radius:2px;
+  cursor:pointer;
+}
+button:hover:not(:disabled){background:var(--vu-hot);}
+button:disabled{background:var(--line);color:var(--paper-faint);cursor:not-allowed;}
+button.ghost{
+  background:transparent;
+  color:var(--paper-dim);
+  border:1px solid var(--line);
+  font-size:14px;
+  padding:6px 12px;
+}
+button.ghost:hover:not(:disabled){background:var(--panel-2);color:var(--paper);}
+
+.drop{
+  border:1px dashed var(--line);
+  background:var(--panel-2);
+  padding:34px 20px;
+  text-align:center;
+  color:var(--paper-dim);
+  cursor:pointer;
+  border-radius:2px;
+}
+.drop:hover,.drop.over{border-color:var(--vu);color:var(--paper);}
+.drop strong{display:block;font-size:20px;color:var(--paper);font-weight:500;margin-bottom:4px;}
+
+#scope{display:none;}
+canvas{
+  display:block;
+  width:100%;
+  height:120px;
+  background:var(--bg);
+  border:1px solid var(--line-soft);
+}
+.trackname{
+  font-family:var(--mono);
+  font-size:13px;
+  color:var(--paper-dim);
+  margin:10px 0 0;
+  word-break:break-all;
+}
+.readout{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(118px,1fr));
+  gap:1px;
+  background:var(--line-soft);
+  border:1px solid var(--line-soft);
+  margin-top:14px;
+}
+.cell{background:var(--panel);padding:10px 12px;}
+.cell .k{font-size:12px;color:var(--paper-faint);}
+.cell .v{font-family:var(--mono);font-size:20px;color:var(--signal);line-height:1.25;}
+.cell .v small{font-size:12px;color:var(--paper-faint);}
+
+.out{margin-top:16px;}
+.out:first-child{margin-top:0;}
+.outhead{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
+.outhead .t{font-size:15px;font-weight:500;flex:1;}
+textarea{resize:vertical;line-height:1.55;}
+textarea.small{min-height:74px;}
+textarea.big{min-height:150px;}
+
+#status{
+  font-family:var(--mono);
+  font-size:13px;
+  color:var(--paper-dim);
+  margin-top:12px;
+  min-height:20px;
+}
+#status.err{color:var(--alert);}
+#status.ok{color:var(--signal);}
+.spin{
+  display:inline-block;width:9px;height:9px;margin-right:7px;
+  background:var(--vu);vertical-align:baseline;
+  animation:pulse 1s steps(2,end) infinite;
+}
+@keyframes pulse{50%{opacity:.15;}}
+@media (prefers-reduced-motion:reduce){.spin{animation:none;}}
+
+footer{color:var(--paper-faint);font-size:13px;margin-top:26px;max-width:62ch;}
+footer code{font-family:var(--mono);color:var(--paper-dim);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top">
+    <h1 data-i18n-html="h1">Referenz <span class="arrow">&rarr;</span> Prompt</h1>
+    <div class="lang" role="group" data-i18n-aria="langGroup" aria-label="Sprache">
+      <button type="button" class="ghost" data-lang="de" lang="de">DE</button>
+      <button type="button" class="ghost" data-lang="en" lang="en">EN</button>
+    </div>
+  </div>
+  <p class="lede" data-i18n="lede">Track laden, analysieren lassen, fertigen Prompt für Suno, Udio, Stable Audio oder ACE-Step herausbekommen. Tempo und Tonart werden lokal gemessen, nicht geraten.</p>
+
+  <section>
+    <h2 data-i18n="secAccess">Zugang</h2>
+    <div class="row">
+      <div class="field">
+        <label for="key" data-i18n="keyLabel">OpenRouter API-Schlüssel</label>
+        <input type="password" id="key" placeholder="sk-or-v1-…" autocomplete="off">
+      </div>
+      <div class="field">
+        <label for="model" data-i18n="modelLabel">Modell</label>
+        <select id="model">
+          <option value="google/gemini-3.8-flash" data-i18n="mStd">Gemini 3.8 Flash — Standard</option>
+          <option value="google/gemini-3.1-flash-lite" data-i18n="mLite">Gemini 3.1 Flash Lite — günstiger</option>
+          <option value="google/gemini-3.5-flash">Gemini 3.5 Flash</option>
+          <option value="xiaomi/mimo-v2.5">Xiaomi MiMo-V2.5</option>
+          <option value="thinkingmachines/inkling:free" data-i18n="mInkling">Inkling (gratis, experimentell)</option>
+        </select>
+      </div>
+    </div>
+    <div class="field" style="margin-bottom:0;">
+      <label><input type="checkbox" id="remember" style="width:auto;margin-right:7px;vertical-align:-1px;"><span data-i18n="remember">Schlüssel im Browser merken</span></label>
+      <p class="hint" data-i18n="keyHint">Der Schlüssel geht nur an openrouter.ai. Die Datei läuft komplett lokal — kein Server dazwischen.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2 data-i18n="secRef">Referenz</h2>
+    <div class="drop" id="drop" tabindex="0" role="button">
+      <strong id="dropTitle" data-i18n="dropTitle">Audiodatei hierher ziehen</strong>
+      <span data-i18n="dropSub">mp3, wav, flac, m4a, ogg — oder klicken zum Auswählen</span>
+    </div>
+    <input type="file" id="file" accept="audio/*" hidden>
+
+    <div id="scope">
+      <canvas id="wave" width="1600" height="240"></canvas>
+      <p class="trackname" id="tname"></p>
+      <div class="readout">
+        <div class="cell"><div class="k" data-i18n="rDur">Dauer</div><div class="v" id="r-dur">–</div></div>
+        <div class="cell"><div class="k" data-i18n="rBpm">Tempo</div><div class="v" id="r-bpm">–</div></div>
+        <div class="cell"><div class="k" data-i18n="rKey">Tonart</div><div class="v" id="r-key">–</div></div>
+        <div class="cell"><div class="k" data-i18n="rLoud">Lautheit</div><div class="v" id="r-lufs">–</div></div>
+        <div class="cell"><div class="k" data-i18n="rTimbre">Klangfarbe</div><div class="v" id="r-bright">–</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2 data-i18n="secTarget">Ziel</h2>
+    <div class="row">
+      <div class="field">
+        <label for="target" data-i18n="targetLabel">Zielgenerator</label>
+        <select id="target">
+          <option value="suno" data-i18n="tSuno">Suno — Style-Feld + Exclude</option>
+          <option value="udio" data-i18n="tUdio">Udio — Tag-Prompt</option>
+          <option value="stableaudio" data-i18n="tStable">Stable Audio — Beschreibungszeile</option>
+          <option value="acestep" data-i18n="tAce">ACE-Step — Tag-Liste</option>
+          <option value="general" data-i18n="tGeneral">Allgemein — Fließtext</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="clip" data-i18n="clipLabel">Ausschnitt zur Analyse</label>
+        <select id="clip">
+          <option value="15" data-i18n="c15">15 Sekunden — sparsam</option>
+          <option value="25" selected data-i18n="c25">25 Sekunden — empfohlen</option>
+          <option value="40" data-i18n="c40">40 Sekunden — gründlich</option>
+        </select>
+      </div>
+    </div>
+    <div class="field" style="margin-bottom:14px;">
+      <label for="note"><span data-i18n="noteLabel">Abweichung vom Original</span> <span style="color:var(--paper-faint)">(optional)</span></label>
+      <input type="text" id="note" data-i18n-ph="notePh" placeholder="z. B. gleicher Groove, aber weibliche Stimme und ohne Streicher">
+    </div>
+    <button id="go" disabled data-i18n="go">Prompt erzeugen</button>
+    <div id="status" role="status" aria-live="polite"></div>
+  </section>
+
+  <section id="result" style="display:none;">
+    <h2 data-i18n="secResult">Ergebnis</h2>
+    <div id="blocks"></div>
+  </section>
+
+  <footer data-i18n="footer">
+    Gemessen wird lokal: Tempo über Spectral-Flux mit Kammfilter, Tonart über Chroma und Krumhansl-Profile. Das Sprachmodell hört nur einen mono-heruntergerechneten 16-kHz-Ausschnitt und bekommt die Messwerte als Vorgabe, damit es BPM und Tonart nicht überschreibt. Künstlernamen werden bewusst nicht ausgegeben — Suno und Udio filtern sie ohnehin.
+  </footer>
+</div>
+
+<script>
+(() => {
+"use strict";
+
+const $ = id => document.getElementById(id);
+const keyEl=$('key'), modelEl=$('model'), rememberEl=$('remember');
+const dropEl=$('drop'), fileEl=$('file'), scopeEl=$('scope');
+const goEl=$('go'), statusEl=$('status'), resultEl=$('result'), blocksEl=$('blocks');
+
+let analysis = null;   // Messwerte + Ausschnitt
+let lastResult = null; // letzte Modellantwort, für Neuaufbau bei Sprachwechsel
+let lastStatus = null;
+let busy = false;
+
+/* ==================== Texte ==================== */
+const I18N = {
+  de: {
+    title: 'Referenz → Prompt',
+    h1: 'Referenz <span class="arrow">&rarr;</span> Prompt',
+    langGroup: 'Sprache',
+    lede: 'Track laden, analysieren lassen, fertigen Prompt für Suno, Udio, Stable Audio oder ACE-Step herausbekommen. Tempo und Tonart werden lokal gemessen, nicht geraten.',
+    secAccess: 'Zugang',
+    keyLabel: 'OpenRouter API-Schlüssel',
+    modelLabel: 'Modell',
+    mStd: 'Gemini 3.8 Flash — Standard',
+    mLite: 'Gemini 3.1 Flash Lite — günstiger',
+    mInkling: 'Inkling (gratis, experimentell)',
+    remember: 'Schlüssel im Browser merken',
+    keyHint: 'Der Schlüssel geht nur an openrouter.ai. Die Datei läuft komplett lokal — kein Server dazwischen.',
+    secRef: 'Referenz',
+    dropTitle: 'Audiodatei hierher ziehen',
+    dropAgain: 'Andere Datei laden',
+    dropSub: 'mp3, wav, flac, m4a, ogg — oder klicken zum Auswählen',
+    rDur: 'Dauer', rBpm: 'Tempo', rKey: 'Tonart', rLoud: 'Lautheit', rTimbre: 'Klangfarbe',
+    secTarget: 'Ziel',
+    targetLabel: 'Zielgenerator',
+    tSuno: 'Suno — Style-Feld + Exclude',
+    tUdio: 'Udio — Tag-Prompt',
+    tStable: 'Stable Audio — Beschreibungszeile',
+    tAce: 'ACE-Step — Tag-Liste',
+    tGeneral: 'Allgemein — Fließtext',
+    clipLabel: 'Ausschnitt zur Analyse',
+    c15: '15 Sekunden — sparsam', c25: '25 Sekunden — empfohlen', c40: '40 Sekunden — gründlich',
+    noteLabel: 'Abweichung vom Original',
+    notePh: 'z. B. gleicher Groove, aber weibliche Stimme und ohne Streicher',
+    go: 'Prompt erzeugen',
+    secResult: 'Ergebnis',
+    footer: 'Gemessen wird lokal: Tempo über Spectral-Flux mit Kammfilter, Tonart über Chroma und Krumhansl-Profile. Das Sprachmodell hört nur einen mono-heruntergerechneten 16-kHz-Ausschnitt und bekommt die Messwerte als Vorgabe, damit es BPM und Tonart nicht überschreibt. Künstlernamen werden bewusst nicht ausgegeben — Suno und Udio filtern sie ohnehin.',
+
+    keyUnclear: 'unklar',
+    fmtKey: (root, minor) => `${root}-${minor ? 'Moll' : 'Dur'}`,
+    conf_high: 'hoch', conf_mid: 'mittel', conf_low: 'niedrig',
+    bright_dark: 'dunkel', bright_warm: 'warm', bright_open: 'offen', bright_bright: 'hell',
+
+    stDecoding: 'Datei wird dekodiert …',
+    stMeasuring: 'Tempo und Tonart werden gemessen …',
+    stAnalysed: 'Analyse fertig. Ziel wählen und Prompt erzeugen.',
+    stDecodeErr: 'Datei ließ sich nicht dekodieren. Bei exotischen Codecs vorher in wav oder mp3 wandeln.',
+    stNoKey: 'Kein API-Schlüssel eingetragen.',
+    stPreparing: 'Ausschnitt wird vorbereitet …',
+    stSending: m => `Ausschnitt geht an ${m} …`,
+    stDone: cost => 'Fertig.' + (cost != null ? ` Kosten: ${Number(cost).toFixed(4)} $` : ''),
+    stNoConn: 'Keine Verbindung zu openrouter.ai. Netzwerk oder Blocker prüfen.',
+    err401: 'Schlüssel wird abgelehnt. Stimmt er noch?',
+    err402: 'Guthaben aufgebraucht.',
+    err413: 'Ausschnitt zu groß — kürzere Länge wählen.',
+    err429: 'Rate Limit erreicht. Kurz warten.',
+    errHttp: (code, body) => `Fehler ${code}: ${body}`,
+    errEmpty: 'Das Modell hat nichts zurückgegeben. Anderes Modell probieren.',
+    errJson: 'Antwort war kein gültiges JSON. Anderes Modell probieren.',
+
+    copy: 'Kopieren', copied: 'Kopiert',
+    bDescription: 'Beschreibung für das Prompt-Feld',
+    bLyrics: 'Lyrics-Feld',
+    bHeard: 'Was das Modell gehört hat',
+    dGenre: 'Genre', dMood: 'Stimmung', dInstr: 'Instrumente', dVocals: 'Gesang', dInstrumental: 'instrumental',
+    dRhythm: 'Rhythmus', dHarmony: 'Harmonik', dProduction: 'Produktion', dArc: 'Verlauf', dMeasured: 'Gemessen',
+
+    sysLang: '- Schreibe genre und subgenres als gängige englische Genrebezeichnungen, die übrigen beschreibenden Felder (mood bis arc) auf Deutsch, die *_en-Felder auf Englisch.',
+    sysIntro: `Du bist Musikproduzent und Prompt-Engineer für generative Audiomodelle.
+Du hörst einen kurzen Ausschnitt eines Referenztracks und beschreibst ihn so, dass ein Generator etwas stilistisch Gleichwertiges erzeugen kann.
+
+Regeln:
+- Antworte ausschließlich mit einem JSON-Objekt. Kein Fließtext, keine Markdown-Zäune.
+- Nenne keine Künstler-, Band- oder Songnamen und keine Plattentitel. Beschreibe den Stil stattdessen über Merkmale.
+- BPM und Tonart sind bereits gemessen und werden dir vorgegeben. Übernimm sie unverändert und widersprich ihnen nicht.
+- Beschreibe nur, was hörbar ist. Rate nichts dazu.`,
+    sysSchema: { genre: 'Hauptgenre', arc: 'kurzer Satz zum Verlauf des Ausschnitts', tags: 'englische Tags, generatortauglich, 10-18 Stück', neg: 'englische Tags, die vermieden werden sollen', line: 'ein englischer Satz, der den Track vollständig beschreibt' },
+    sysSchemaHead: 'Schema:',
+    user: (r, a) =>
+`Gemessene Werte des Originals (verbindlich):
+- Tempo: ${r.bpm} BPM
+- Tonart: ${a.key} (Sicherheit der Messung: ${a.conf})
+- Gesamtdauer: ${a.dur}
+- Klangfarbe: ${a.bright} (Spektralschwerpunkt ${r.centroid} Hz)
+- Dynamik: Crest-Faktor ${r.crest} dB
+Der Ausschnitt beginnt bei ${a.start} und ist ${a.len} Sekunden lang, mono, 16 kHz.
+${a.note ? 'Gewünschte Abweichung vom Original: ' + a.note : ''}
+
+Analysiere den Ausschnitt und antworte im vorgegebenen JSON-Schema.`
+  },
+
+  en: {
+    title: 'Reference → Prompt',
+    h1: 'Reference <span class="arrow">&rarr;</span> Prompt',
+    langGroup: 'Language',
+    lede: 'Load a track, let it be analysed, get a ready-to-use prompt for Suno, Udio, Stable Audio or ACE-Step. Tempo and key are measured locally, not guessed.',
+    secAccess: 'Access',
+    keyLabel: 'OpenRouter API key',
+    modelLabel: 'Model',
+    mStd: 'Gemini 3.8 Flash — default',
+    mLite: 'Gemini 3.1 Flash Lite — cheaper',
+    mInkling: 'Inkling (free, experimental)',
+    remember: 'Remember key in this browser',
+    keyHint: 'The key is only sent to openrouter.ai. The page runs entirely locally — no server in between.',
+    secRef: 'Reference',
+    dropTitle: 'Drop an audio file here',
+    dropAgain: 'Load another file',
+    dropSub: 'mp3, wav, flac, m4a, ogg — or click to choose',
+    rDur: 'Duration', rBpm: 'Tempo', rKey: 'Key', rLoud: 'Loudness', rTimbre: 'Timbre',
+    secTarget: 'Target',
+    targetLabel: 'Target generator',
+    tSuno: 'Suno — style field + exclude',
+    tUdio: 'Udio — tag prompt',
+    tStable: 'Stable Audio — description line',
+    tAce: 'ACE-Step — tag list',
+    tGeneral: 'General — free text',
+    clipLabel: 'Excerpt to analyse',
+    c15: '15 seconds — economical', c25: '25 seconds — recommended', c40: '40 seconds — thorough',
+    noteLabel: 'Deviation from the original',
+    notePh: 'e.g. same groove, but female vocals and no strings',
+    go: 'Generate prompt',
+    secResult: 'Result',
+    footer: 'Measured locally: tempo via spectral flux with a comb filter, key via chroma and Krumhansl profiles. The language model only hears a 16 kHz mono excerpt and receives the measurements as fixed values, so it cannot override BPM and key. Artist names are deliberately left out — Suno and Udio filter them anyway.',
+
+    keyUnclear: 'unclear',
+    fmtKey: (root, minor) => `${root} ${minor ? 'minor' : 'major'}`,
+    conf_high: 'high', conf_mid: 'medium', conf_low: 'low',
+    bright_dark: 'dark', bright_warm: 'warm', bright_open: 'open', bright_bright: 'bright',
+
+    stDecoding: 'Decoding file …',
+    stMeasuring: 'Measuring tempo and key …',
+    stAnalysed: 'Analysis done. Choose a target and generate the prompt.',
+    stDecodeErr: 'The file could not be decoded. Convert exotic codecs to wav or mp3 first.',
+    stNoKey: 'No API key entered.',
+    stPreparing: 'Preparing excerpt …',
+    stSending: m => `Sending excerpt to ${m} …`,
+    stDone: cost => 'Done.' + (cost != null ? ` Cost: $${Number(cost).toFixed(4)}` : ''),
+    stNoConn: 'No connection to openrouter.ai. Check your network or blocker.',
+    err401: 'Key rejected. Is it still valid?',
+    err402: 'Out of credits.',
+    err413: 'Excerpt too large — choose a shorter length.',
+    err429: 'Rate limit reached. Wait a moment.',
+    errHttp: (code, body) => `Error ${code}: ${body}`,
+    errEmpty: 'The model returned nothing. Try another model.',
+    errJson: 'The response was not valid JSON. Try another model.',
+
+    copy: 'Copy', copied: 'Copied',
+    bDescription: 'Description for the prompt field',
+    bLyrics: 'Lyrics field',
+    bHeard: 'What the model heard',
+    dGenre: 'Genre', dMood: 'Mood', dInstr: 'Instruments', dVocals: 'Vocals', dInstrumental: 'instrumental',
+    dRhythm: 'Rhythm', dHarmony: 'Harmony', dProduction: 'Production', dArc: 'Arc', dMeasured: 'Measured',
+
+    sysLang: '- Write all fields in English.',
+    sysIntro: `You are a music producer and prompt engineer for generative audio models.
+You listen to a short excerpt of a reference track and describe it so that a generator can create something stylistically equivalent.
+
+Rules:
+- Reply with a single JSON object only. No prose, no Markdown fences.
+- Do not name artists, bands, songs or album titles. Describe the style through its characteristics instead.
+- BPM and key have already been measured and are given to you. Adopt them unchanged and do not contradict them.
+- Describe only what is audible. Do not guess.`,
+    sysSchema: { genre: 'main genre', arc: 'short sentence on how the excerpt develops', tags: 'English tags, generator-ready, 10-18 items', neg: 'English tags to avoid', line: 'one English sentence that fully describes the track' },
+    sysSchemaHead: 'Schema:',
+    user: (r, a) =>
+`Measured values of the original (binding):
+- Tempo: ${r.bpm} BPM
+- Key: ${a.key} (measurement confidence: ${a.conf})
+- Total duration: ${a.dur}
+- Timbre: ${a.bright} (spectral centroid ${r.centroid} Hz)
+- Dynamics: crest factor ${r.crest} dB
+The excerpt starts at ${a.start} and is ${a.len} seconds long, mono, 16 kHz.
+${a.note ? 'Requested deviation from the original: ' + a.note : ''}
+
+Analyse the excerpt and reply in the given JSON schema.`
+  }
+};
+
+/* ---------- Speicher (nur wenn der Browser es zulässt) ---------- */
+const store = (() => {
+  try { const t='__t'; localStorage.setItem(t,'1'); localStorage.removeItem(t); return localStorage; }
+  catch(e){ return null; }
+})();
+
+let lang = (() => {
+  const q = new URLSearchParams(location.search).get('lang');
+  if (q && I18N[q]) return q;
+  const saved = store && store.getItem('ui_lang');
+  if (saved && I18N[saved]) return saved;
+  return (navigator.language || '').toLowerCase().startsWith('de') ? 'de' : 'en';
+})();
+
+const t = (k, ...args) => {
+  const v = I18N[lang][k] ?? I18N.de[k] ?? k;
+  return typeof v === 'function' ? v(...args) : v;
+};
+
+function applyLang(){
+  document.documentElement.lang = lang;
+  document.title = t('title');
+  document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
+  document.querySelectorAll('[data-i18n-html]').forEach(el => { el.innerHTML = t(el.dataset.i18nHtml); });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el => { el.placeholder = t(el.dataset.i18nPh); });
+  document.querySelectorAll('[data-i18n-aria]').forEach(el => { el.setAttribute('aria-label', t(el.dataset.i18nAria)); });
+  document.querySelectorAll('.lang button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.lang === lang)));
+  if (analysis) showReadout(analysis.res);
+  if (lastResult) render(lastResult.parsed, lastResult.res, false);
+  paintStatus();
+}
+
+document.querySelectorAll('.lang button').forEach(b => b.addEventListener('click', () => {
+  if (b.dataset.lang === lang) return;
+  lang = b.dataset.lang;
+  if (store) store.setItem('ui_lang', lang);
+  applyLang();
+}));
+
+/* ---------- Schlüssel merken ---------- */
+if (store) {
+  const saved = store.getItem('or_key');
+  if (saved) { keyEl.value = saved; rememberEl.checked = true; }
+  const savedModel = store.getItem('or_model');
+  if (savedModel) modelEl.value = savedModel;
+  rememberEl.addEventListener('change', () => {
+    if (rememberEl.checked) store.setItem('or_key', keyEl.value.trim());
+    else store.removeItem('or_key');
+  });
+  keyEl.addEventListener('change', () => { if (rememberEl.checked) store.setItem('or_key', keyEl.value.trim()); });
+  modelEl.addEventListener('change', () => store.setItem('or_model', modelEl.value));
+} else {
+  rememberEl.disabled = true;
+  rememberEl.parentElement.style.color = 'var(--paper-faint)';
+}
+
+/* Status wird als Schlüssel + Argumente gemerkt, damit er beim Sprachwechsel mitwandert */
+function setStatus(key, kind, spin, ...args){
+  lastStatus = { key, kind, spin, args };
+  paintStatus();
+}
+function paintStatus(){
+  if (!lastStatus) return;
+  const { key, kind, spin, args } = lastStatus;
+  statusEl.className = kind || '';
+  statusEl.textContent = '';
+  if (spin){ const sp = document.createElement('span'); sp.className = 'spin'; statusEl.appendChild(sp); }
+  statusEl.appendChild(document.createTextNode(key === null ? args[0] : t(key, ...args)));
+}
+/* Fehler mit übersetzbarem Text */
+function fail(key, ...args){ const e = new Error(key); e.i18n = { key, args }; return e; }
+
+/* ==================== Datei laden ==================== */
+dropEl.addEventListener('click', () => fileEl.click());
+dropEl.addEventListener('keydown', e => { if(e.key==='Enter'||e.key===' '){ e.preventDefault(); fileEl.click(); }});
+['dragenter','dragover'].forEach(ev => dropEl.addEventListener(ev, e => { e.preventDefault(); dropEl.classList.add('over'); }));
+['dragleave','drop'].forEach(ev => dropEl.addEventListener(ev, e => { e.preventDefault(); dropEl.classList.remove('over'); }));
+dropEl.addEventListener('drop', e => { const f = e.dataTransfer.files[0]; if (f) handleFile(f); });
+fileEl.addEventListener('change', () => { if (fileEl.files[0]) handleFile(fileEl.files[0]); });
+
+async function handleFile(file){
+  if (busy) return;
+  busy = true; goEl.disabled = true; analysis = null; lastResult = null;
+  resultEl.style.display = 'none';
+  setStatus('stDecoding', '', true);
+  try {
+    const bytes = await file.arrayBuffer();
+    const ac = new (window.AudioContext || window.webkitAudioContext)();
+    const buf = await ac.decodeAudioData(bytes.slice(0));
+    ac.close();
+
+    setStatus('stMeasuring', '', true);
+    await frame();
+    const mono = await resampleMono(buf, 22050);
+    const res = measure(mono, 22050);
+    res.duration = buf.duration;
+    res.channels = buf.numberOfChannels;
+    res.sampleRate = buf.sampleRate;
+    res.name = file.name;
+
+    drawWave(mono, res);
+    $('tname').textContent = `${file.name} · ${buf.numberOfChannels === 1 ? 'mono' : 'stereo'} · ${Math.round(buf.sampleRate/1000)} kHz`;
+    showReadout(res);
+    scopeEl.style.display = 'block';
+    $('dropTitle').dataset.i18n = 'dropAgain';
+    $('dropTitle').textContent = t('dropAgain');
+
+    analysis = { res, buf };
+    goEl.disabled = false;
+    setStatus('stAnalysed', 'ok');
+  } catch (err) {
+    console.error(err);
+    setStatus('stDecodeErr', 'err');
+  } finally { busy = false; }
+}
+
+function showReadout(res){
+  $('r-dur').textContent = fmtTime(res.duration);
+  $('r-bpm').innerHTML = `${res.bpm} <small>BPM</small>`;
+  $('r-key').textContent = keyName(res.key);
+  $('r-lufs').innerHTML = `${res.rmsDb.toFixed(1)} <small>dB RMS</small>`;
+  $('r-bright').textContent = t('bright_' + res.brightness);
+}
+
+const keyName = k => k.root ? t('fmtKey', k.root, k.minor) : t('keyUnclear');
+const keyNameEn = k => k.root ? I18N.en.fmtKey(k.root, k.minor) : '';
+
+const frame = () => new Promise(r => requestAnimationFrame(() => r()));
+const fmtTime = s => `${Math.floor(s/60)}:${String(Math.round(s%60)).padStart(2,'0')}`;
+
+/* ==================== Resampling / Mono ==================== */
+async function resampleMono(buf, sr){
+  const len = Math.max(1, Math.ceil(buf.duration * sr));
+  const oc = new OfflineAudioContext(1, len, sr);
+  const src = oc.createBufferSource();
+  src.buffer = buf;
+  src.connect(oc.destination);
+  src.start(0);
+  const out = await oc.startRendering();
+  return out.getChannelData(0);
+}
+
+async function excerpt(buf, seconds, sr){
+  const dur = Math.min(seconds, buf.duration);
+  const start = Math.max(0, Math.min(buf.duration * 0.32, buf.duration - dur));
+  const oc = new OfflineAudioContext(1, Math.ceil(dur * sr), sr);
+  const src = oc.createBufferSource();
+  src.buffer = buf;
+  src.connect(oc.destination);
+  src.start(0, start, dur);
+  const out = await oc.startRendering();
+  return { data: out.getChannelData(0), start, dur };
+}
+
+/* ==================== FFT ==================== */
+function fft(re, im){
+  const n = re.length;
+  for (let i=1, j=0; i<n; i++){
+    let bit = n >> 1;
+    for (; j & bit; bit >>= 1) j ^= bit;
+    j ^= bit;
+    if (i < j){ [re[i],re[j]]=[re[j],re[i]]; [im[i],im[j]]=[im[j],im[i]]; }
+  }
+  for (let len=2; len<=n; len<<=1){
+    const ang = -2*Math.PI/len, wr = Math.cos(ang), wi = Math.sin(ang);
+    for (let i=0; i<n; i+=len){
+      let cr = 1, ci = 0;
+      for (let k=0; k<len/2; k++){
+        const ur=re[i+k], ui=im[i+k];
+        const vr=re[i+k+len/2]*cr - im[i+k+len/2]*ci;
+        const vi=re[i+k+len/2]*ci + im[i+k+len/2]*cr;
+        re[i+k]=ur+vr; im[i+k]=ui+vi;
+        re[i+k+len/2]=ur-vr; im[i+k+len/2]=ui-vi;
+        const ncr = cr*wr - ci*wi; ci = cr*wi + ci*wr; cr = ncr;
+      }
+    }
+  }
+}
+const hann = n => { const w=new Float32Array(n); for(let i=0;i<n;i++) w[i]=0.5-0.5*Math.cos(2*Math.PI*i/(n-1)); return w; };
+
+/* ==================== Messung ==================== */
+function measure(x, sr){
+  /* --- Pegel --- */
+  let sum = 0, peak = 0;
+  for (let i=0;i<x.length;i++){ sum += x[i]*x[i]; const a=Math.abs(x[i]); if(a>peak) peak=a; }
+  const rms = Math.sqrt(sum/x.length);
+  const rmsDb = 20*Math.log10(rms || 1e-9);
+  const peakDb = 20*Math.log10(peak || 1e-9);
+
+  /* --- Spectral Flux für Onsets + Helligkeit --- */
+  const N = 1024, hop = 512, w = hann(N);
+  const frames = Math.max(1, Math.floor((x.length - N)/hop));
+  const flux = new Float32Array(frames);
+  let prev = new Float32Array(N/2);
+  let centSum = 0, centW = 0;
+
+  const re = new Float64Array(N), im = new Float64Array(N);
+  for (let f=0; f<frames; f++){
+    const off = f*hop;
+    for (let i=0;i<N;i++){ re[i] = x[off+i]*w[i]; im[i]=0; }
+    fft(re, im);
+    let d = 0, mSum = 0, mfSum = 0;
+    for (let k=0;k<N/2;k++){
+      const m = Math.hypot(re[k], im[k]);
+      const diff = m - prev[k];
+      if (diff > 0) d += diff;
+      prev[k] = m;
+      mSum += m; mfSum += m * (k*sr/N);
+    }
+    flux[f] = d;
+    if (mSum > 1e-6){ centSum += mfSum/mSum; centW++; }
+  }
+  const centroid = centW ? centSum/centW : 0;
+
+  /* --- Tempo: Kammfilter über die Onset-Hüllkurve --- */
+  const fps = sr/hop;
+  // Hüllkurve normalisieren
+  let mean=0; for(let i=0;i<frames;i++) mean+=flux[i]; mean/=frames||1;
+  const env = new Float32Array(frames);
+  for (let i=0;i<frames;i++) env[i] = Math.max(0, flux[i]-mean);
+
+  let best = {bpm:120, score:-1};
+  for (let bpm=55; bpm<=210; bpm+=0.25){
+    const period = fps*60/bpm;
+    let score = 0, hits = 0;
+    for (let beat=1; beat<=Math.min(64, Math.floor(frames/period)); beat++){
+      const idx = Math.round(beat*period);
+      if (idx >= frames) break;
+      // kleines Fenster gegen Rundungsdrift
+      let v = 0;
+      for (let o=-1; o<=1; o++){ const j=idx+o; if(j>=0&&j<frames) v=Math.max(v, env[j]); }
+      score += v; hits++;
+    }
+    if (hits > 3){
+      const s = score/Math.sqrt(hits);
+      if (s > best.score) best = {bpm, score:s};
+    }
+  }
+  let bpm = best.bpm;
+  while (bpm < 68) bpm *= 2;
+  while (bpm > 190) bpm /= 2;
+  bpm = Math.round(bpm*10)/10;
+
+  /* --- Tonart: Chroma + Krumhansl --- */
+  const CN = 4096, chop = 2048, cw = hann(CN);
+  const chroma = new Float64Array(12);
+  const cre = new Float64Array(CN), cim = new Float64Array(CN);
+  const cframes = Math.max(1, Math.floor((x.length - CN)/chop));
+  const step = Math.max(1, Math.floor(cframes/240)); // höchstens ~240 Frames analysieren
+  for (let f=0; f<cframes; f+=step){
+    const off = f*chop;
+    for (let i=0;i<CN;i++){ cre[i]=x[off+i]*cw[i]; cim[i]=0; }
+    fft(cre, cim);
+    for (let k=2;k<CN/2;k++){
+      const freq = k*sr/CN;
+      if (freq < 65 || freq > 2100) continue;
+      const m = Math.hypot(cre[k], cim[k]);
+      const midi = 69 + 12*Math.log2(freq/440);
+      const pc = ((Math.round(midi) % 12) + 12) % 12;
+      chroma[pc] += m;
+    }
+  }
+  const key = detectKey(chroma);
+
+  return {
+    bpm, key, keyConfidence: key.conf,
+    rmsDb, peakDb,
+    crest: +(peakDb - rmsDb).toFixed(1),
+    centroid: Math.round(centroid),
+    brightness: centroid < 900 ? 'dark' : centroid < 1700 ? 'warm' : centroid < 2800 ? 'open' : 'bright',
+    chroma: Array.from(chroma)
+  };
+}
+
+function detectKey(chroma){
+  const NOTES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+  const MAJ = [6.35,2.23,3.48,2.33,4.38,4.09,2.52,5.19,2.39,3.66,2.29,2.88];
+  const MIN = [6.33,2.68,3.52,5.38,2.60,3.53,2.54,4.75,3.98,2.69,3.34,3.17];
+  const total = chroma.reduce((a,b)=>a+b,0) || 1;
+  const v = Array.from(chroma, c => c/total);
+  const corr = (a,b) => {
+    const ma = a.reduce((x,y)=>x+y,0)/12, mb = b.reduce((x,y)=>x+y,0)/12;
+    let num=0, da=0, db=0;
+    for (let i=0;i<12;i++){ const p=a[i]-ma, q=b[i]-mb; num+=p*q; da+=p*p; db+=q*q; }
+    return num/Math.sqrt((da*db)||1e-12);
+  };
+  let best = {score:-2, root:null, minor:false}, second = -2;
+  for (let r=0;r<12;r++){
+    const rot = v.slice(r).concat(v.slice(0,r));
+    const sMaj = corr(rot, MAJ), sMin = corr(rot, MIN);
+    if (sMaj > best.score){ second = best.score; best = {score:sMaj, root:NOTES[r], minor:false}; }
+    else if (sMaj > second) second = sMaj;
+    if (sMin > best.score){ second = best.score; best = {score:sMin, root:NOTES[r], minor:true}; }
+    else if (sMin > second) second = sMin;
+  }
+  const margin = best.score - second;
+  return { root: best.root, minor: best.minor, conf: margin > 0.08 ? 'high' : margin > 0.03 ? 'mid' : 'low' };
+}
+
+/* ==================== Wellenform ==================== */
+function drawWave(x, res){
+  const c = $('wave'), ctx = c.getContext('2d');
+  const W = c.width, H = c.height;
+  ctx.clearRect(0,0,W,H);
+  const per = Math.floor(x.length/W) || 1;
+  ctx.fillStyle = '#69aca3';
+  for (let i=0;i<W;i++){
+    let mn = 0, mx = 0;
+    for (let j=0;j<per;j++){
+      const v = x[i*per+j] || 0;
+      if (v<mn) mn=v; if (v>mx) mx=v;
+    }
+    const y1 = (1-mx)*H/2, y2 = (1-mn)*H/2;
+    ctx.fillRect(i, y1, 1, Math.max(1, y2-y1));
+  }
+  ctx.strokeStyle = '#413a34';
+  ctx.beginPath(); ctx.moveTo(0,H/2); ctx.lineTo(W,H/2); ctx.stroke();
+  res._W = W; res._H = H;
+}
+function markExcerpt(startSec, durSec, totalSec){
+  const c = $('wave'), ctx = c.getContext('2d');
+  const W = c.width, H = c.height;
+  const a = (startSec/totalSec)*W, b = (durSec/totalSec)*W;
+  ctx.fillStyle = 'rgba(232,163,61,0.16)';
+  ctx.fillRect(a, 0, b, H);
+  ctx.strokeStyle = '#e8a33d';
+  ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(a,0); ctx.lineTo(a,H); ctx.moveTo(a+b,0); ctx.lineTo(a+b,H); ctx.stroke();
+}
+
+/* ==================== WAV + Base64 ==================== */
+function wav16(data, sr){
+  const n = data.length;
+  const bytes = new ArrayBuffer(44 + n*2);
+  const dv = new DataView(bytes);
+  const str = (o,s) => { for(let i=0;i<s.length;i++) dv.setUint8(o+i, s.charCodeAt(i)); };
+  str(0,'RIFF'); dv.setUint32(4, 36+n*2, true); str(8,'WAVE');
+  str(12,'fmt '); dv.setUint32(16,16,true); dv.setUint16(20,1,true); dv.setUint16(22,1,true);
+  dv.setUint32(24,sr,true); dv.setUint32(28,sr*2,true); dv.setUint16(32,2,true); dv.setUint16(34,16,true);
+  str(36,'data'); dv.setUint32(40, n*2, true);
+  let o = 44;
+  for (let i=0;i<n;i++){
+    let s = Math.max(-1, Math.min(1, data[i]));
+    dv.setInt16(o, s<0 ? s*0x8000 : s*0x7FFF, true);
+    o += 2;
+  }
+  return new Uint8Array(bytes);
+}
+function b64(u8){
+  let s = '';
+  const chunk = 0x8000;
+  for (let i=0;i<u8.length;i+=chunk) s += String.fromCharCode.apply(null, u8.subarray(i, i+chunk));
+  return btoa(s);
+}
+
+/* ==================== Modellaufruf ==================== */
+function systemPrompt(){
+  const L = I18N[lang], d = L.sysSchema;
+  return `${L.sysIntro}
+${L.sysLang}
+
+${L.sysSchemaHead}
+{
+  "genre": "${d.genre}",
+  "subgenres": ["…", "…"],
+  "mood": ["…"],
+  "instruments": ["…"],
+  "vocals": {"present": true|false, "register": "…", "delivery": "…", "language": "…"},
+  "rhythm": {"feel": "…", "groove": "…", "drums": "…"},
+  "harmony": "…",
+  "production": {"era": "…", "mix": "…", "effects": ["…"]},
+  "arc": "${d.arc}",
+  "tags_en": ["${d.tags}"],
+  "negative_en": ["${d.neg}"],
+  "one_line_en": "${d.line}"
+}`;
+}
+
+goEl.addEventListener('click', async () => {
+  if (!analysis || busy) return;
+  const key = keyEl.value.trim();
+  if (!key){ setStatus('stNoKey', 'err'); keyEl.focus(); return; }
+
+  busy = true; goEl.disabled = true;
+  try {
+    setStatus('stPreparing', '', true);
+    const secs = parseInt($('clip').value, 10);
+    const ex = await excerpt(analysis.buf, secs, 16000);
+    markExcerpt(ex.start, ex.dur, analysis.buf.duration);
+    const audio = b64(wav16(ex.data, 16000));
+
+    const r = analysis.res;
+    const userText = t('user', r, {
+      key: keyName(r.key),
+      conf: t('conf_' + r.keyConfidence),
+      dur: fmtTime(analysis.buf.duration),
+      bright: t('bright_' + r.brightness),
+      start: fmtTime(ex.start),
+      len: Math.round(ex.dur),
+      note: $('note').value.trim()
+    });
+
+    setStatus('stSending', '', true, modelEl.value);
+
+    const resp = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer '+key },
+      body: JSON.stringify({
+        model: modelEl.value,
+        max_tokens: 2000,
+        messages: [
+          { role:'system', content: systemPrompt() },
+          { role:'user', content: [
+            { type:'text', text: userText },
+            { type:'input_audio', input_audio: { data: audio, format:'wav' } }
+          ]}
+        ]
+      })
+    });
+
+    if (!resp.ok){
+      const body = await resp.text();
+      if ([401,402,413,429].includes(resp.status)) throw fail('err' + resp.status);
+      throw fail('errHttp', resp.status, body.slice(0,200));
+    }
+
+    const data = await resp.json();
+    const text = (data.choices?.[0]?.message?.content || '').trim();
+    if (!text) throw fail('errEmpty');
+
+    const parsed = parseJson(text);
+    if (!parsed) throw fail('errJson');
+
+    lastResult = { parsed, res: r };
+    render(parsed, r, true);
+    setStatus('stDone', 'ok', false, data.usage?.cost);
+  } catch (err) {
+    console.error(err);
+    if (err.i18n) setStatus(err.i18n.key, 'err', false, ...err.i18n.args);
+    else {
+      const msg = String(err.message || err);
+      if (msg.includes('Failed to fetch')) setStatus('stNoConn', 'err');
+      else setStatus(null, 'err', false, msg);
+    }
+  } finally {
+    busy = false; goEl.disabled = false;
+  }
+});
+
+function parseJson(t){
+  let s = t.replace(/```json/gi,'').replace(/```/g,'').trim();
+  const a = s.indexOf('{'), b = s.lastIndexOf('}');
+  if (a < 0 || b < a) return null;
+  try { return JSON.parse(s.slice(a, b+1)); } catch(e){ return null; }
+}
+
+/* ==================== Ausgabe ==================== */
+$('target').addEventListener('change', () => { if (lastResult) render(lastResult.parsed, lastResult.res, false); });
+
+function render(p, r, scroll){
+  const tags = (p.tags_en||[]).filter(Boolean);
+  const neg  = (p.negative_en||[]).filter(Boolean);
+  const bpm = Math.round(r.bpm);
+  const keyEn = keyNameEn(r.key);
+  const bpmKey = [`${bpm} bpm`, keyEn].filter(Boolean).join(', ');
+  const target = $('target').value;
+  const blocks = [];
+
+  const styleTags = [p.genre, ...(p.subgenres||[]), ...tags].filter(Boolean);
+  const dedup = [...new Set(styleTags.map(s => String(s).toLowerCase()))];
+
+  if (target === 'suno'){
+    let style = `${dedup.join(', ')}, ${bpmKey}`;
+    if (style.length > 200) style = style.slice(0, style.lastIndexOf(',', 200)) + `, ${bpm} bpm`;
+    blocks.push(['Style of Music', style, 'small']);
+    blocks.push(['Exclude Styles', neg.join(', '), 'small']);
+    blocks.push([t('bDescription'), p.one_line_en || '', 'small']);
+  } else if (target === 'udio'){
+    blocks.push(['Prompt', `${p.one_line_en || ''} ${dedup.join(', ')}, ${bpmKey}`.trim(), 'big']);
+    blocks.push(['Negative', neg.join(', '), 'small']);
+  } else if (target === 'stableaudio'){
+    blocks.push(['Prompt', `${dedup.join(', ')}, ${bpmKey}. ${p.one_line_en || ''}`, 'big']);
+    blocks.push(['Negative Prompt', neg.join(', '), 'small']);
+  } else if (target === 'acestep'){
+    blocks.push(['Tags', `${dedup.join(', ')}, ${bpmKey}`, 'small']);
+    blocks.push([t('bLyrics'), p.vocals?.present ? '[verse]\n…\n\n[chorus]\n…' : '[inst]', 'small']);
+    blocks.push(['Negative Tags', neg.join(', '), 'small']);
+  } else {
+    blocks.push(['Prompt', `${p.one_line_en || ''}\n\n${dedup.join(', ')}, ${bpmKey}.`, 'big']);
+  }
+
+  const details = [
+    `${t('dGenre')}: ${p.genre || '–'}${(p.subgenres||[]).length ? ' (' + p.subgenres.join(', ') + ')' : ''}`,
+    `${t('dMood')}: ${(p.mood||[]).join(', ') || '–'}`,
+    `${t('dInstr')}: ${(p.instruments||[]).join(', ') || '–'}`,
+    `${t('dVocals')}: ${p.vocals?.present ? [p.vocals.register, p.vocals.delivery, p.vocals.language].filter(Boolean).join(', ') : t('dInstrumental')}`,
+    `${t('dRhythm')}: ${[p.rhythm?.feel, p.rhythm?.groove, p.rhythm?.drums].filter(Boolean).join(' · ') || '–'}`,
+    `${t('dHarmony')}: ${p.harmony || '–'}`,
+    `${t('dProduction')}: ${[p.production?.era, p.production?.mix, (p.production?.effects||[]).join('/')].filter(Boolean).join(' · ') || '–'}`,
+    `${t('dArc')}: ${p.arc || '–'}`,
+    `${t('dMeasured')}: ${bpm} BPM · ${keyName(r.key)} · ${t('bright_' + r.brightness)} · Crest ${r.crest} dB`
+  ].join('\n');
+  blocks.push([t('bHeard'), details, 'big']);
+
+  blocksEl.innerHTML = '';
+  blocks.forEach(([title, value, size]) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'out';
+    const head = document.createElement('div');
+    head.className = 'outhead';
+    const tt = document.createElement('div');
+    tt.className = 't'; tt.textContent = title;
+    const btn = document.createElement('button');
+    btn.className = 'ghost'; btn.textContent = t('copy');
+    const ta = document.createElement('textarea');
+    ta.className = size; ta.value = value || '';
+    btn.addEventListener('click', async () => {
+      try { await navigator.clipboard.writeText(ta.value); }
+      catch(e){ ta.select(); document.execCommand('copy'); }
+      btn.textContent = t('copied');
+      setTimeout(() => btn.textContent = t('copy'), 1400);
+    });
+    head.appendChild(tt); head.appendChild(btn);
+    wrap.appendChild(head); wrap.appendChild(ta);
+    blocksEl.appendChild(wrap);
+  });
+  resultEl.style.display = 'block';
+  if (scroll) resultEl.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block:'start' });
+}
+
+applyLang();
+
+})();
+</script>
+</body>
+</html>
